@@ -7,7 +7,7 @@ from argparse import ArgumentParser
 parser = ArgumentParser()
 
 parser.add_argument('dir_path', metavar='DIR', type=str, help='Path to the directory with fitness data')
-parser.add_argument('-o', '--output', type=str, default='integrated_fitness.csv', help='output file path (relative)')
+parser.add_argument('-o', '--output', type=str, default='integrated_fitness.csv', help='output file name')
 parser.add_argument('-p', '--pattern', type=str, default='*-*.log', help='input filename pattern')
 
 
