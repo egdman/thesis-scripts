@@ -19,6 +19,7 @@ parser.add_argument('--label-size', type=float, default=40, help='text size for 
 parser.add_argument('--legend-size', type=float, default=30, help='text size for the legend')
 parser.add_argument('--tick-size', type=float, default=30, help='text size for the ticks')
 
+
 def mean(values_list):
     return float(sum(values_list)) / float(len(values_list)) if len(values_list) > 0 else float('nan')
 
@@ -57,11 +58,14 @@ def main():
     points_y = []
     mean_points_x = []
     mean_points_y = []
+    y_data_bins = []
+    x_data_labels = []
 
     with open(in_file_path, 'r') as in_file:
         for line in in_file:
             items = line.split(',')
             label = float(items[0])
+            data_bin = []
 
             if label not in data_to_labels:
                 data_to_labels[label] = []
@@ -71,6 +75,10 @@ def main():
                 points_x.append(label)
                 points_y.append(float(item))
                 data_to_labels[label].append(float(item))
+                data_bin.append(float(item))
+
+            y_data_bins.append(data_bin)
+            x_data_labels.append(label)
 
     for label in data_to_labels:
         values = data_to_labels[label]
@@ -81,15 +89,17 @@ def main():
 
 
     # plot scatter:
-    fig = plt.figure(figsize=(16, 10))
+    fig = plt.figure(figsize=(14, 8))
     ax = fig.add_subplot(111)
 
+ #   ax.boxplot(y_data_bins) # box plots suck
     ax.scatter(points_x, points_y, s=50)
-    ax.scatter(mean_points_x, mean_points_y, marker='+', s=500, edgecolors='black')
+    ax.scatter(mean_points_x, mean_points_y, marker='+', s=3000, edgecolors='black')
+
 
     ax.tick_params(axis='both', which='major', labelsize=tick_size)
     ax.set_title(args.title, fontsize=title_size, y=1.02)
-    xartist = ax.set_xlabel('population size', fontsize=label_size)
+    xartist = ax.set_xlabel('speciation threshold', fontsize=label_size)
     yartist = ax.set_ylabel('integrated fitness', fontsize=label_size)
     ax.grid()
     fig.savefig(out_file_path + ".png", bbox_extra_artists=(xartist, yartist), bbox_inches='tight')

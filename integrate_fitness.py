@@ -9,6 +9,7 @@ parser = ArgumentParser()
 parser.add_argument('dir_path', metavar='DIR', type=str, help='Path to the directory with fitness data')
 parser.add_argument('-o', '--output', type=str, default='integrated_fitness.csv', help='output file name')
 parser.add_argument('-p', '--pattern', type=str, default='*-*.log', help='input filename pattern')
+parser.add_argument('--precise', action='store_true', help='Integrate all velocities instead of just the maximum ones')
 
 
 def main():
@@ -64,9 +65,18 @@ def main():
             eval_num = 0
             for data_item in data:
                 velocities = data_item['velocities']
-                max_velo = max(velocities)
                 eval_num += len(velocities)
-                part_sum_list.append((len(velocities), max_velo*len(velocities)))
+
+                if args.precise:
+                    part_sum = 0
+                    for vel in velocities:
+                        part_sum += vel
+
+                    part_sum_list.append((len(velocities), part_sum))
+
+                else:
+                    max_velo = max(velocities)
+                    part_sum_list.append((len(velocities), max_velo*len(velocities)))
 
             max_lists_to_labels[label].append(part_sum_list)
             print "{0} evaluations".format(eval_num)
