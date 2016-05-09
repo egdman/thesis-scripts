@@ -99,7 +99,7 @@ def main():
 
     ax.tick_params(axis='both', which='major', labelsize=tick_size)
     ax.set_title(args.title, fontsize=title_size, y=1.02)
-    xartist = ax.set_xlabel('speciation threshold', fontsize=label_size)
+    xartist = ax.set_xlabel('population size', fontsize=label_size)
     yartist = ax.set_ylabel('integrated fitness', fontsize=label_size)
     ax.grid()
     fig.savefig(out_file_path + ".png", bbox_extra_artists=(xartist, yartist), bbox_inches='tight')

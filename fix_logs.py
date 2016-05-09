@@ -16,7 +16,8 @@ def main():
     args = parser.parse_args()
 
     dir_path = args.dir_path
-    out_dir_path = args.output_dir
+    out_dir_name = args.output_dir
+    out_dir_path = os.path.join(dir_path, out_dir_name)
 
     if out_dir_path == '':
         out_dir_path = os.path.join(dir_path, "fixed")
