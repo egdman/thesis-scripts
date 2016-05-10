@@ -8,6 +8,16 @@ import matplotlib.lines as mlines
 import matplotlib.colors as colors
 import matplotlib.cm as cmx
 
+import re
+
+def sorted_nicely( l ):
+    """ Sort the given iterable in the way that humans expect.
+        by Mark Byers: http://stackoverflow.com/questions/2669059/how-to-sort-alpha-numeric-set-in-python
+    """
+    convert = lambda text: int(text) if text.isdigit() else text
+    alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ]
+    return sorted(l, key = alphanum_key)
+
 
 parser = ArgumentParser("plot_fitness.py")
 
@@ -97,7 +107,8 @@ def main():
         # labels.append(label)
 
     # sort labels:
-    sorted_labels = sorted(list(label_set), key = lambda item: float(item))
+    # sorted_labels = sorted(list(label_set), key = lambda item: float(item))
+    sorted_labels = sorted_nicely(list(label_set))
 
     # assign colors to labels:
     colmap = get_colormap(len(sorted_labels))
