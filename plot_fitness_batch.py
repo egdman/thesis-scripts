@@ -1,6 +1,7 @@
 import yaml
 import random
 import os
+import fnmatch
 from argparse import ArgumentParser
 from matplotlib import pyplot as plt
 import matplotlib.lines as mlines
@@ -45,14 +46,16 @@ def main():
     out_file_path = os.path.join(dir_path, args.output)
 
     files_and_dirs = os.listdir(dir_path)
-    files = [f for f in files_and_dirs if os.path.isfile(os.path.join(dir_path, f))]
+    files = [f for f in files_and_dirs if os.path.isfile(os.path.join(dir_path, f)) and
+             fnmatch.fnmatch(f, '*-*.log')]
 
 
 
 
     map_data_to_labels = {}
+    label_set = set()
 
-    color_map = {} # dictionary {label:color} because we want the same labels have the same color
+    color_to_label = {} # dictionary {label:color} because we want the same labels have the same color
 
 
     for filename in files:
@@ -80,39 +83,46 @@ def main():
             velocities = data_items[i][1]
             generation_num.append(gen+1)
             evaluation_num.append((gen+1) * len(velocities))
-            max_val.append(max(velocities))
+            max_val.append(max(velocities) * 100.0)
 
-
-
-        if label not in color_map:
-            color = get_random_color_pretty()
-            color_map[label] = color
 
         if label not in map_data_to_labels:
             map_data_to_labels[label] = []
 
         map_data_to_labels[label].append({'x': evaluation_num, 'y': max_val})
+        label_set.add(label)
+
         # x_lists.append(evaluation_num)
         # y_lists.append(max_val)
         # labels.append(label)
 
+    # sort labels:
+    sorted_labels = sorted(list(label_set), key = lambda item: float(item))
 
+    # assign colors to labels:
+    colmap = get_colormap(len(sorted_labels))
+    for i, label in enumerate(sorted_labels):
+        color_to_label[label] = colmap(i)
 
     # plot raw data:
     fig = plt.figure(figsize=(10, 12))
     ax = fig.add_subplot(111)
-    for label, graphs in map_data_to_labels.items():
+
+#    for label, graphs in map_data_to_labels.items():
+    for label in sorted_labels:
+        graphs = map_data_to_labels[label]
+
         for graph in graphs:
             ax.plot(graph['x'], graph['y'], linewidth=2,
-                    label=label, color=color_map[label],
+                    label=label, color=color_to_label[label],
                     markevery=100)
-    hnd, lab = get_handles_labels(color_map)
+    hnd, lab = get_handles_labels(sorted_labels, color_to_label)
     ax.legend(hnd, lab, loc=0, prop={'size': legend_size})
 
     ax.tick_params(axis='both', which='major', labelsize=tick_size)
     ax.set_title(args.title, fontsize=title_size, y=1.02)
     xartist = ax.set_xlabel('evaluation #', fontsize=label_size)
-    yartist = ax.set_ylabel('fitness', fontsize=label_size)
+    yartist = ax.set_ylabel('movement speed, cm/s', fontsize=label_size)
     ax.grid()
     fig.savefig(out_file_path + ".png", bbox_extra_artists=(xartist, yartist), bbox_inches='tight')
     # ##################################################################################################
@@ -124,7 +134,10 @@ def main():
     # plot averaged data:
     fig = plt.figure(figsize=(10, 12))
     ax = fig.add_subplot(111)
-    for label, graphs in map_data_to_labels.items():
+
+ #   for label, graphs in map_data_to_labels.items():
+    for label in sorted_labels:
+        graphs = map_data_to_labels[label]
         graph_lengths = [len(graph['x']) for graph in graphs]
         mean_y = []
 
@@ -142,36 +155,36 @@ def main():
             mean_y.append(sum)
 
 
-        overall_means[float(label)] = mean(mean_y[(num_points/2):])
+        # overall_means[float(label)] = mean(mean_y[(num_points/2):])
 
         ax.plot(graphs[0]['x'][:num_points], mean_y, linewidth=3,
-                label=label, color=color_map[label],
+                label=label, color=color_to_label[label],
                 markevery=100)
-    hnd, lab = get_handles_labels(color_map)
+    hnd, lab = get_handles_labels(sorted_labels, color_to_label)
     ax.legend(hnd, lab, loc=0, prop={'size': legend_size})
 
     ax.tick_params(axis='both', which='major', labelsize=tick_size)
     ax.set_title(args.title, fontsize=title_size, y=1.02)
     xartist = ax.set_xlabel('evaluation #', fontsize=label_size)
-    yartist = ax.set_ylabel('mean fitness', fontsize=label_size)
+    yartist = ax.set_ylabel('movement speed, cm/s', fontsize=label_size)
     ax.grid()
     fig.savefig(out_file_path + "_mean.png", bbox_extra_artists=(xartist, yartist), bbox_inches='tight')
     # ##################################################################################################
 
 
-    # plot overall means for each label:
-    fig = plt.figure(figsize=(8, 5))
-    ax = fig.add_subplot(111)
-    label_values = [float(label) for label in map_data_to_labels]
-    label_values = sorted(label_values)
-    label_means = [overall_means[label] for label in overall_means]
-    ax.scatter(label_values, label_means, label='overall means')
-    ax.set_title("overall means", fontsize=title_size, y=1.02)
-    xartist = ax.set_xlabel('speciation threshold', fontsize=label_size)
-    yartist = ax.set_ylabel('overall mean fitness', fontsize=label_size)
-    ax.grid()
-    fig.savefig(out_file_path + "_overall_mean.png", bbox_extra_artists=(xartist, yartist), bbox_inches='tight')
-    # ##################################################################################################
+    # # plot overall means for each label:
+    # fig = plt.figure(figsize=(8, 5))
+    # ax = fig.add_subplot(111)
+    # label_values = [float(label) for label in map_data_to_labels]
+    # label_values = sorted(label_values)
+    # label_means = [overall_means[label] for label in overall_means]
+    # ax.scatter(label_values, label_means, label='overall means')
+    # ax.set_title("overall means", fontsize=title_size, y=1.02)
+    # xartist = ax.set_xlabel('speciation threshold', fontsize=label_size)
+    # yartist = ax.set_ylabel('overall mean fitness', fontsize=label_size)
+    # ax.grid()
+    # fig.savefig(out_file_path + "_overall_mean.png", bbox_extra_artists=(xartist, yartist), bbox_inches='tight')
+    # # ##################################################################################################
 
 
 def get_random_color():
@@ -195,12 +208,12 @@ def get_random_color_pretty(brightness=0.7):
     return color2
 
 
-def get_handles_labels(label_to_color_map):
+def get_handles_labels(ordered_labels, color_to_label):
 
     legend_handles = []
     legend_labels = []
-    for label in label_to_color_map:
-        color = label_to_color_map[label]
+    for label in ordered_labels:
+        color = color_to_label[label]
         hnd = mlines.Line2D([],[], color=color, linewidth=5)
         legend_handles.append(hnd)
         legend_labels.append(label)
@@ -211,7 +224,7 @@ def get_colormap(N):
     '''Returns a function that maps each index in 0, 1, ... N-1 to a distinct
     RGB color.'''
     color_norm  = colors.Normalize(vmin=0, vmax=N-1)
-    scalar_map = cmx.ScalarMappable(norm=color_norm, cmap='hsv')
+    scalar_map = cmx.ScalarMappable(norm=color_norm, cmap='jet') # hsv
     def map_index_to_rgb_color(index):
         return scalar_map.to_rgba(index)
     return map_index_to_rgb_color
