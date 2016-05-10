@@ -9,7 +9,7 @@ from argparse import ArgumentParser
 parser = ArgumentParser("draw_nn.py")
 
 parser.add_argument('input_path', metavar='INPUT', type=str, help="Path to a genotype YAML file")
-parser.add_argument('-o', '--output_path', metavar='OUTPUT', type=str, help="Path to a graph drawing")
+parser.add_argument('-o', '--output-path', metavar='OUTPUT', default="neural_network", type=str, help="Path to a graph drawing")
 
 
 def main():
@@ -21,6 +21,7 @@ def main():
         engine='fdp',
     )
 
+    out_file_path = os.path.join(os.path.dirname(args.input_path), args.output_path)
     with open(args.input_path, 'r') as in_file:
         yaml_nn = in_file.read()
 
@@ -41,11 +42,13 @@ def main():
     num_inputs = len(inputs)
     num_outputs = len(outputs)
 
-    canvas_width = 10
+    canvas_width = 6
     margin = 0.5
 
     in_spacing = float(canvas_width) / float(num_inputs)
     out_spacing = float(canvas_width) / float(num_outputs)
+
+    canv_center_y = canv_center_x = canvas_width / 2.0
 
     inputs_added = 0
     outputs_added = 0
@@ -72,6 +75,7 @@ def main():
     for n in hidden:
         if n['enabled']:
             label = "{0}, {1}".format(n['type'], n['hist_mark'])
+
             graph.node(name=n['id'], label=label)
 
     for c in connections:
@@ -83,7 +87,7 @@ def main():
             n_to = filter(lambda neuron: neuron['hist_mark'] == mark_to, neurons)[0]
             graph.edge(n_from['id'], n_to['id'], _attributes={'style': linestyle})
 
-    graph.render(filename=args.output_path)
+    graph.render(filename=out_file_path)
 
 
 if __name__ == '__main__':
