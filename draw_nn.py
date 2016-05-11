@@ -42,7 +42,7 @@ def main():
     num_inputs = len(inputs)
     num_outputs = len(outputs)
 
-    canvas_width = 6
+    canvas_width = 12
     margin = 0.5
 
     in_spacing = float(canvas_width) / float(num_inputs)
@@ -74,9 +74,10 @@ def main():
 
     for n in hidden:
         if n['enabled']:
-            label = "{0}, {1}".format(n['type'], n['hist_mark'])
+            label = "{0},{1},{2}".format(n['type'], n['hist_mark'], n['part_id'])
 
-            graph.node(name=n['id'], label=label)
+            pos = "{0},{1}".format(0, 0)
+            graph.node(name=n['id'], label=label, _attributes={"pos" : pos})
 
     for c in connections:
         if c['enabled']:
