@@ -75,26 +75,37 @@ def main():
         with open(file_path, 'r') as in_file:
             yaml_data = in_file.read()
 
-        label = filename.split('-')[-2]
-        print 'label : {0}'.format(label)
+        # label = filename.split('-')[-2]
 
+        label = get_label(filename)
+        print "label : '{0}'".format(label)
 
         data = yaml.load(yaml_data)
-        data_items = [(data_item['generation'], data_item['velocities']) for data_item in data]
+
+
+        data_keyword = 'data'
+        if 'velocities' in data[0]:
+            data_keyword = 'velocities'
+        elif 'sizes' in data[0]:
+            data_keyword = 'sizes'
+
+
+        data_items = [(data_item['generation'], data_item[data_keyword]) for data_item in data]
         data_items = sorted(data_items, key=lambda pair: pair[0])
 
         generation_num = []
         evaluation_num = []
         max_val = []
+        best_val = []
 #
         for i in range(len(data_items)):
 
             gen = data_items[i][0]
-            velocities = data_items[i][1]
+            data_points = data_items[i][1]
             generation_num.append(gen+1)
-            evaluation_num.append((gen+1) * len(velocities))
-            max_val.append(max(velocities) * 100.0)
-
+            evaluation_num.append((gen+1) * len(data_points))
+            max_val.append(max(data_points) * 100.0)
+            best_val.append(data_points[0])
 
         if label not in map_data_to_labels:
             map_data_to_labels[label] = []
@@ -116,7 +127,7 @@ def main():
         color_to_label[label] = colmap(i)
 
     # plot raw data:
-    fig = plt.figure(figsize=(10, 12))
+    fig = plt.figure(figsize=(14, 12))
     ax = fig.add_subplot(111)
 
 #    for label, graphs in map_data_to_labels.items():
@@ -128,7 +139,7 @@ def main():
                     label=label, color=color_to_label[label],
                     markevery=100)
     hnd, lab = get_handles_labels(sorted_labels, color_to_label)
-    ax.legend(hnd, lab, loc=0, prop={'size': legend_size})
+    ax.legend(hnd, lab, loc=0, prop={'size': legend_size}, framealpha=0.5)
 
     ax.tick_params(axis='both', which='major', labelsize=tick_size)
     ax.set_title(args.title, fontsize=title_size, y=1.02)
@@ -143,7 +154,7 @@ def main():
 
 
     # plot averaged data:
-    fig = plt.figure(figsize=(10, 12))
+    fig = plt.figure(figsize=(14, 12))
     ax = fig.add_subplot(111)
 
  #   for label, graphs in map_data_to_labels.items():
@@ -172,7 +183,7 @@ def main():
                 label=label, color=color_to_label[label],
                 markevery=100)
     hnd, lab = get_handles_labels(sorted_labels, color_to_label)
-    ax.legend(hnd, lab, loc=0, prop={'size': legend_size})
+    ax.legend(hnd, lab, loc=0, prop={'size': legend_size}, framealpha=0.5)
 
     ax.tick_params(axis='both', which='major', labelsize=tick_size)
     ax.set_title(args.title, fontsize=title_size, y=1.02)
@@ -229,6 +240,17 @@ def get_handles_labels(ordered_labels, color_to_label):
         legend_handles.append(hnd)
         legend_labels.append(label)
     return legend_handles, legend_labels
+
+
+def get_label(filename):
+    words = filename.split('-')
+    del words[-1]
+    label = ""
+    for word in words:
+        label += word
+        label += "-"
+    # chop off last whitespace
+    return label[:-1]
 
 
 def get_colormap(N):

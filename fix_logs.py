@@ -7,8 +7,8 @@ from argparse import ArgumentParser
 parser = ArgumentParser()
 
 parser.add_argument('dir_path', metavar='PATH', type=str, help="Path to a genotype log directory")
-parser.add_argument('-p', '--pattern', type=str, default='genotypes.log', help="Pattern to match filenames")
-parser.add_argument('-o', '--output-dir', type=str, default='', help='Output directory')
+parser.add_argument('-p', '--pattern', type=str, default='gen_*_genotypes.log', help="Pattern to match filenames")
+parser.add_argument('-o', '--output-dir', type=str, default='fixed', help='Output directory')
 
 
 

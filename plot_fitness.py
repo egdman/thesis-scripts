@@ -1,3 +1,4 @@
+import os
 import yaml
 from argparse import ArgumentParser
 from matplotlib import pyplot as plt
@@ -60,7 +61,9 @@ def main():
     for i in range(len(data_items)):
 
         gen = data_items[i][0]
-        velocities = data_items[i][1]
+
+        # multiply by 100 to convert to cm/s
+        velocities = [value*100.0 for value in data_items[i][1]]
 
         generation_num.append(gen+1)
 
@@ -101,13 +104,14 @@ def main():
     ax.tick_params(axis='both', which='major', labelsize=tick_size)
     ax.set_title(args.title, fontsize=title_size, y=1.02)
     xartist = ax.set_xlabel('evaluation #', fontsize=label_size)
-    yartist = ax.set_ylabel('fitness', fontsize=label_size)
+    yartist = ax.set_ylabel('movement speed, cm/s', fontsize=label_size)
 
     ax.grid()
     if args.output == '':
         plt.show()
     else:
-        fig.savefig(args.output, bbox_extra_artists=(xartist,yartist), bbox_inches='tight')
+        out_file_path = os.path.join(os.path.dirname(args.file_path), args.output)
+        fig.savefig(out_file_path, bbox_extra_artists=(xartist,yartist), bbox_inches='tight')
 
 
 if __name__ == '__main__':
