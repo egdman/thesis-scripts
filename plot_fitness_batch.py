@@ -19,7 +19,7 @@ def sorted_nicely( l ):
     return sorted(l, key = alphanum_key)
 
 
-parser = ArgumentParser("plot_fitness.py")
+parser = ArgumentParser()
 
 parser.add_argument('dir_path', metavar='DIR', type=str, help="Path to a fitness log file")
 parser.add_argument('-t', '--title', type=str, default='plot title', help='Title of the plot')
@@ -29,6 +29,19 @@ parser.add_argument('--title-size', type=float, default=42, help='text size for 
 parser.add_argument('--label-size', type=float, default=40, help='text size for the axis labels')
 parser.add_argument('--legend-size', type=float, default=30, help='text size for the legend')
 parser.add_argument('--tick-size', type=float, default=30, help='text size for the ticks')
+
+parser.add_argument('--horsize', type=float, default=14, help='horizontal size of the image')
+parser.add_argument('--vertsize', type=float, default=12, help='vertical size of the image')
+
+parser.add_argument('--ylim-min', type=float, help='min Y axis limit')
+parser.add_argument('--ylim-max', type=float, help='max Y axis limit')
+
+parser.add_argument('--xlim-min', type=float, help='min X axis limit')
+parser.add_argument('--xlim-max', type=float, help='max X axis limit')
+
+parser.add_argument('-lt', '--legend-title', type=str, default='', help='The title of the legend')
+
+MARKERSIZE = 6
 
 def mean(values_list):
     return float(sum(values_list)) / float(len(values_list)) if len(values_list) > 0 else float('nan')
@@ -44,6 +57,7 @@ def median(values_list):
     return median
 
 
+
 def main():
     args = parser.parse_args()
 
@@ -51,6 +65,7 @@ def main():
     label_size = args.label_size
     tick_size = args.tick_size
     legend_size = args.legend_size
+
 
     dir_path = args.dir_path
     out_file_path = os.path.join(dir_path, args.output)
@@ -66,6 +81,7 @@ def main():
     label_set = set()
 
     color_to_label = {} # dictionary {label:color} because we want the same labels have the same color
+    style_to_label = {} # dictionary {label:linestyle}
 
 
     for filename in files:
@@ -125,9 +141,18 @@ def main():
     colmap = get_colormap(len(sorted_labels))
     for i, label in enumerate(sorted_labels):
         color_to_label[label] = colmap(i)
+        color_to_label[label] = 'black'
+
+
+    # assign styles to labels:
+    stylemap = get_stylemap(len(sorted_labels))
+    for i, label in enumerate(sorted_labels):
+        style_to_label[label] = stylemap[i]
+   #     style_to_label[label] = ('-', '')
+
 
     # plot raw data:
-    fig = plt.figure(figsize=(14, 12))
+    fig = plt.figure(figsize=(args.horsize, args.vertsize))
     ax = fig.add_subplot(111)
 
 #    for label, graphs in map_data_to_labels.items():
@@ -137,15 +162,27 @@ def main():
         for graph in graphs:
             ax.plot(graph['x'], graph['y'], linewidth=2,
                     label=label, color=color_to_label[label],
-                    markevery=100)
-    hnd, lab = get_handles_labels(sorted_labels, color_to_label)
-    ax.legend(hnd, lab, loc=0, prop={'size': legend_size}, framealpha=0.5)
+                    linestyle=style_to_label[label][0],
+                    marker=style_to_label[label][1],
+                    markersize=MARKERSIZE)
+    hnd, lab = get_handles_labels(sorted_labels, color_to_label, style_to_label)
+    
+    lgd = ax.legend(hnd, lab, loc=0, prop={'size': legend_size}, framealpha=0.5)
+    if args.legend_title is not None:
+        lgd.set_title(args.legend_title, prop={'size': legend_size})
 
     ax.tick_params(axis='both', which='major', labelsize=tick_size)
     ax.set_title(args.title, fontsize=title_size, y=1.02)
     xartist = ax.set_xlabel('evaluation #', fontsize=label_size)
     yartist = ax.set_ylabel('movement speed, cm/s', fontsize=label_size)
     ax.grid()
+
+    if args.ylim_min is not None and args.ylim_max is not None:
+        ax.set_ylim(args.ylim_min, args.ylim_max)
+
+    if args.xlim_min is not None and args.xlim_max is not None:
+        ax.set_xlim(args.xlim_min, args.xlim_max)
+
     fig.savefig(out_file_path + ".png", bbox_extra_artists=(xartist, yartist), bbox_inches='tight')
     # ##################################################################################################
 
@@ -154,7 +191,7 @@ def main():
 
 
     # plot averaged data:
-    fig = plt.figure(figsize=(14, 12))
+    fig = plt.figure(figsize=(args.horsize, args.vertsize))
     ax = fig.add_subplot(111)
 
  #   for label, graphs in map_data_to_labels.items():
@@ -177,36 +214,32 @@ def main():
             mean_y.append(sum)
 
 
-        # overall_means[float(label)] = mean(mean_y[(num_points/2):])
 
         ax.plot(graphs[0]['x'][:num_points], mean_y, linewidth=3,
                 label=label, color=color_to_label[label],
-                markevery=100)
-    hnd, lab = get_handles_labels(sorted_labels, color_to_label)
-    ax.legend(hnd, lab, loc=0, prop={'size': legend_size}, framealpha=0.5)
+                linestyle=style_to_label[label][0],
+                marker=style_to_label[label][1],
+                markersize=MARKERSIZE)
+    hnd, lab = get_handles_labels(sorted_labels, color_to_label, style_to_label)
+    lgd = ax.legend(hnd, lab, loc=0, prop={'size': legend_size}, framealpha=0.5)
+    if args.legend_title is not None:
+        lgd.set_title(args.legend_title, prop={'size': legend_size})
 
     ax.tick_params(axis='both', which='major', labelsize=tick_size)
     ax.set_title(args.title, fontsize=title_size, y=1.02)
     xartist = ax.set_xlabel('evaluation #', fontsize=label_size)
     yartist = ax.set_ylabel('movement speed, cm/s', fontsize=label_size)
     ax.grid()
+
+    if args.ylim_min is not None and args.ylim_max is not None:
+        ax.set_ylim(args.ylim_min, args.ylim_max)
+
+    if args.xlim_min is not None and args.xlim_max is not None:
+        ax.set_xlim(args.xlim_min, args.xlim_max)
+
     fig.savefig(out_file_path + "_mean.png", bbox_extra_artists=(xartist, yartist), bbox_inches='tight')
     # ##################################################################################################
 
-
-    # # plot overall means for each label:
-    # fig = plt.figure(figsize=(8, 5))
-    # ax = fig.add_subplot(111)
-    # label_values = [float(label) for label in map_data_to_labels]
-    # label_values = sorted(label_values)
-    # label_means = [overall_means[label] for label in overall_means]
-    # ax.scatter(label_values, label_means, label='overall means')
-    # ax.set_title("overall means", fontsize=title_size, y=1.02)
-    # xartist = ax.set_xlabel('speciation threshold', fontsize=label_size)
-    # yartist = ax.set_ylabel('overall mean fitness', fontsize=label_size)
-    # ax.grid()
-    # fig.savefig(out_file_path + "_overall_mean.png", bbox_extra_artists=(xartist, yartist), bbox_inches='tight')
-    # # ##################################################################################################
 
 
 def get_random_color():
@@ -230,13 +263,24 @@ def get_random_color_pretty(brightness=0.7):
     return color2
 
 
-def get_handles_labels(ordered_labels, color_to_label):
+def get_handles_labels(ordered_labels, color_to_label, style_to_label=None):
 
     legend_handles = []
     legend_labels = []
     for label in ordered_labels:
         color = color_to_label[label]
-        hnd = mlines.Line2D([],[], color=color, linewidth=5)
+
+        if style_to_label is not None:
+            style = style_to_label[label]
+        else:
+            style = ('-', '')
+
+        hnd = mlines.Line2D([],[], color=color,
+            linestyle=style[0],
+            marker=style[1],
+            markersize=MARKERSIZE,
+            linewidth=5)
+
         legend_handles.append(hnd)
         legend_labels.append(label)
     return legend_handles, legend_labels
@@ -249,8 +293,20 @@ def get_label(filename):
     for word in words:
         label += word
         label += "-"
-    # chop off last whitespace
+    # chop off last dash
     return label[:-1]
+
+
+def get_stylemap(N):
+    styles = ['-', '--', '-.', ':']
+    markers = ['', 's', '^']
+    combinations = []
+    for marker in markers:
+        for style in styles:   
+            combinations.append((style, marker))
+
+    stylemap = [combinations[i % len(combinations)] for i in range(0, N)]
+    return stylemap
 
 
 def get_colormap(N):

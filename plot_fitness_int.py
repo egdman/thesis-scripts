@@ -1,6 +1,7 @@
 import yaml
 import random
 import os
+import math
 from argparse import ArgumentParser
 from matplotlib import pyplot as plt
 import matplotlib.lines as mlines
@@ -34,6 +35,16 @@ def median(values_list):
     return median
 
 
+
+def st_dev(values_list):
+    variance = 0
+    sample_mean = mean(values_list)
+    for value in values_list:
+        variance += (value - sample_mean)*(value - sample_mean)
+    variance /= float(len(values_list) - 1.0)
+    return math.sqrt(variance)
+
+
 def main():
     args = parser.parse_args()
 
@@ -58,6 +69,10 @@ def main():
     points_y = []
     mean_points_x = []
     mean_points_y = []
+
+    st_dev_plus = []
+    st_dev_minus = []
+
     y_data_bins = []
     x_data_labels = []
 
@@ -84,6 +99,8 @@ def main():
         values = data_to_labels[label]
         mean_points_x.append(label)
         mean_points_y.append(mean(values))
+        st_dev_plus.append(mean(values) + st_dev(values))
+        st_dev_minus.append(mean(values) - st_dev(values))
 
 
 
@@ -95,6 +112,8 @@ def main():
  #   ax.boxplot(y_data_bins) # box plots suck
     ax.scatter(points_x, points_y, s=50)
     ax.scatter(mean_points_x, mean_points_y, marker='+', s=3000, edgecolors='black')
+    ax.scatter(mean_points_x, st_dev_plus, marker='_', s=3000, edgecolors='black')
+    ax.scatter(mean_points_x, st_dev_minus, marker='_', s=3000, edgecolors='black')
 
 
     ax.tick_params(axis='both', which='major', labelsize=tick_size)
@@ -105,9 +124,7 @@ def main():
     fig.savefig(out_file_path + ".png", bbox_extra_artists=(xartist, yartist), bbox_inches='tight')
     # ##################################################################################################
 
-
-
-
+   
 
 if __name__ == '__main__':
     main()

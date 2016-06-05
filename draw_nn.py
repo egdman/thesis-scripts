@@ -42,7 +42,7 @@ def main():
     num_inputs = len(inputs)
     num_outputs = len(outputs)
 
-    canvas_width = 12
+    canvas_width = 6
     margin = 0.5
 
     in_spacing = float(canvas_width) / float(num_inputs)
@@ -60,7 +60,8 @@ def main():
             coord_y = margin + in_spacing * inputs_added
             inputs_added += 1
             pos = "{0},{1}!".format(coord_x, coord_y)
-            label = "{0}, {1}".format(n['id'], n['hist_mark'])
+            # label = "{0}, {1}".format(n['id'], n['hist_mark'])
+            label = "{0}".format(n['id'])
             graph.node(name=n['id'], label=label, _attributes={"pos" : pos, "shape": "box"})
 
     for n in outputs:
@@ -69,14 +70,15 @@ def main():
             coord_y = margin + out_spacing * outputs_added
             outputs_added += 1
             pos = "{0},{1}!".format(coord_x, coord_y)
-            label = "{0}, {1}".format(n['id'], n['hist_mark'])
+            # label = "{0}, {1}".format(n['id'], n['hist_mark'])
+            label = "{0}".format(n['id'])
             graph.node(name=n['id'], label=label, _attributes={"pos" : pos, "shape": "box"})
 
     for n in hidden:
         if n['enabled']:
             label = "{0},{1},{2}".format(n['type'], n['hist_mark'], n['part_id'])
-
-            pos = "{0},{1}".format(0, 0)
+            label = "{0},{1}".format(n['type'], n['part_id'])
+            pos = "{0},{1}!".format(canv_center_x, canv_center_y)
             graph.node(name=n['id'], label=label, _attributes={"pos" : pos})
 
     for c in connections:
