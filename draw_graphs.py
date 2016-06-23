@@ -45,10 +45,11 @@ def draw_graph(in_file, out_file):
     for num in range(node_count):
         graph.node(name=str(num))
 
-    for edge in edges:
-        src = str(edge['src'])
-        dst = str(edge['dst'])
-        graph.edge(src, dst)
+    if edges:
+        for edge in edges:
+            src = str(edge['src'])
+            dst = str(edge['dst'])
+            graph.edge(src, dst)
     graph.render(filename=out_file)
 
 

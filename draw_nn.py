@@ -78,7 +78,7 @@ def main():
         if n['enabled']:
             label = "{0},{1},{2}".format(n['type'], n['hist_mark'], n['part_id'])
             label = "{0},{1}".format(n['type'], n['part_id'])
-            pos = "{0},{1}!".format(canv_center_x, canv_center_y)
+            pos = "{0},{1}".format(canv_center_x, canv_center_y)
             graph.node(name=n['id'], label=label, _attributes={"pos" : pos})
 
     for c in connections:
