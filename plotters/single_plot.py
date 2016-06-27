@@ -25,8 +25,13 @@ def plot_single(axes, args, xdata, ydata, data_labels, xlabel, ylabel):
     xartist = ax.set_xlabel(xlabel, fontsize=label_size)
     yartist = ax.set_ylabel(ylabel, fontsize=label_size)
 
+    if args.xlim_min is not None or args.xlim_max is not None:
+        ax.set_xlim(args.xlim_min, args.xlim_max)
+
     if args.ylim_min is not None or args.ylim_max is not None:
         ax.set_ylim(args.ylim_min, args.ylim_max)
+
+  
 
     # ax.grid()
     return [xartist, yartist]

@@ -3,8 +3,8 @@ import matplotlib.lines as mlines
 MARKERSIZE = 6
 
 
-def mean(values_list):
-    return float(sum(values_list)) / float(len(values_list)) if len(values_list) > 0 else float('nan')
+# def mean(values_list):
+#     return float(sum(values_list)) / float(len(values_list)) if len(values_list) > 0 else float('nan')
 
 
 
