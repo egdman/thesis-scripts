@@ -2,7 +2,7 @@ import os
 import yaml
 
 from matplotlib import pyplot as plt
-from plotters import parser, plot_single, read_sizes_from_file, read_fitness_from_file
+from plotters import parser, plot_single, read_sizes_from_file, read_fitness_from_file, draw_legend
 
 
 parser.add_argument('size_file', metavar='SIZE_FILE', type=str, help="Path to a size log file")
@@ -18,19 +18,34 @@ def main():
 	fig = plt.figure(figsize=(args.horsize,args.vertsize))
 	ax1 = fig.add_subplot(111)
 
-	extra_artists1 = plot_single(ax1, args, xdata=fitness_data['eval'],
+	colors = {"max velocity": "magenta", "number of neurons": "yellow"}
+	styles={"max velocity": ('-', ''), "number of neurons": ('-', '')}
+
+	extra_artists1 = plot_single(ax1, args,
+		xdata=fitness_data['eval'],
 	    ydata=[fitness_data['max']],
 	    data_labels=["max velocity"],
 	    xlabel="evaluation #",
-	    ylabel="movement speed, cm/s")
+	    ylabel="movement speed, cm/s",
+	    colors=colors,
+	    styles=styles
+	)
 
 	ax2 = ax1.twinx()
 
-	extra_artists2 = plot_single(ax2, args, xdata=size_data['eval'],
-	    ydata=[size_data['max']],
+	extra_artists2 = plot_single(ax2, args,
+		xdata=size_data['eval'],
+	    ydata=[size_data['best']],
 	    data_labels=["number of neurons"],
 	    xlabel="evaluation #",
-	    ylabel="number of neurons")
+	    ylabel="number of neurons",
+	    colors=colors,
+	    styles=styles
+	)
+
+	ax1.grid()
+
+	draw_legend(ax1, args, ["max velocity", "number of neurons"], color_to_label=colors, style_to_label=styles)
 
 
 	if args.output == '':

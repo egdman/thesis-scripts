@@ -1,37 +1,34 @@
-def plot_single(axes, args, xdata, ydata, data_labels, xlabel, ylabel):
+from .batch_plot import plot_raw
+from .common import get_default_styles, get_default_colors
+
+
+
+def plot_single(axes, args, xdata, ydata, data_labels, xlabel, ylabel, colors=None, styles=None):
 	
     if len(ydata) != len(data_labels):
     	print "Error: Number of plots must be equal to number of data labels"
     	return None
 
-    title_size = args.title_size
-    label_size = args.label_size
-    tick_size = args.tick_size
-    legend_size = args.legend_size
-
-    ax = axes
-    styles = ['--', '-', ':', '--']
-    colors = ['red', 'green', 'black', 'blue']
-
-    for i in range(len(ydata)):
-    	ax.plot(xdata, ydata[i], linewidth=3, label=data_labels[i], linestyle=styles[i%4],
-    		color=colors[i%4], ms=10, markevery=100)
-
-
-    ax.legend(loc=0, prop={'size': legend_size})
-
-    ax.tick_params(axis='both', which='major', labelsize=tick_size)
-    ax.set_title(args.title, fontsize=title_size, y=1.02)
-    xartist = ax.set_xlabel(xlabel, fontsize=label_size)
-    yartist = ax.set_ylabel(ylabel, fontsize=label_size)
-
-    if args.xlim_min is not None or args.xlim_max is not None:
-        ax.set_xlim(args.xlim_min, args.xlim_max)
-
-    if args.ylim_min is not None or args.ylim_max is not None:
-        ax.set_ylim(args.ylim_min, args.ylim_max)
-
+    if styles is None:
+        styles = get_default_styles(data_labels)
   
 
-    # ax.grid()
-    return [xartist, yartist]
+    if colors is None:
+        colors = get_default_colors(data_labels)
+      
+
+    data_map = {data_labels[i]: [{'x': xdata, 'y': ydata[i]}] for i in range(len(ydata))}
+    
+
+    extra_artists = plot_raw(axes, args,
+        sorted_labels=data_labels,
+        map_data_to_labels=data_map,
+        color_to_label=colors,
+        style_to_label=styles,
+        xlabel=xlabel,
+        ylabel=ylabel
+    )
+
+   
+    return extra_artists
+

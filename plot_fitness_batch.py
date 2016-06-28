@@ -8,7 +8,7 @@ from matplotlib import pyplot as plt
 import matplotlib.colors as colors
 import matplotlib.cm as cmx
 
-from plotters import parser, plot_raw, plot_average, sorted_nicely, read_from_dir
+from plotters import parser, plot_raw, plot_average, sorted_nicely, read_from_dir, draw_legend
 
 
 parser.add_argument('dir_path', metavar='DIR', type=str, help="Path to a fitness log directory")
@@ -53,16 +53,23 @@ def main():
     fig = plt.figure(figsize=(args.horsize, args.vertsize))
     ax = fig.add_subplot(111)
 
+    # draw plots:
     extra_artists = plot_raw(ax, args,
         sorted_labels=sorted_labels,
         map_data_to_labels=map_data_to_labels,
         color_to_label=color_to_label,
         style_to_label=style_to_label,
         xlabel="evaluation #",
-        ylabel="movement speed, cm/s")
+        ylabel="movement speed, cm/s",
+        thickness=2)
 
+    # draw grid:
     ax.grid()
 
+    # draw legend:
+    draw_legend(ax, args, sorted_labels, color_to_label, style_to_label)
+
+    # save figure to file:
     fig.savefig(out_file_path + ".png", bbox_extra_artists=extra_artists, bbox_inches='tight')
     # ##################################################################################################
 
@@ -71,6 +78,7 @@ def main():
     fig = plt.figure(figsize=(args.horsize, args.vertsize))
     ax = fig.add_subplot(111)
 
+    # draw plots:
     extra_artists = plot_average(ax, args,
         sorted_labels=sorted_labels,
         map_data_to_labels=map_data_to_labels,
@@ -79,8 +87,13 @@ def main():
         xlabel="evaluation #",
         ylabel="movement speed, cm/s")
 
+    # draw grid:
     ax.grid()
 
+     # draw legend:
+    draw_legend(ax, args, sorted_labels, color_to_label, style_to_label)
+
+    # save figure to file:
     fig.savefig(out_file_path + "_mean.png", bbox_extra_artists=extra_artists, bbox_inches='tight')
     # ##################################################################################################
 
