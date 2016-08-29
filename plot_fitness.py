@@ -1,5 +1,4 @@
 import os
-import yaml
 
 from matplotlib import pyplot as plt
 from plotters import parser, plot_single, read_fitness_from_file, get_default_colors, get_default_styles, draw_legend
